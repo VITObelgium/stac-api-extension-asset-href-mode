@@ -1,0 +1,119 @@
+openapi: 3.0.3
+info:
+  title: The SpatioTemporal Asset Catalog API - asset-href-mode
+  description: Adds parameter to get different asset links depending on the parameter value.
+  version: 0.0.1
+  
+tags:
+  - name: asset-href-mode Extension
+    description: Part of STAC API - asset-href-mode extension definition
+    
+paths:
+  '/':
+    get:
+      description: Landing Page
+      tags:
+        - Core
+      responses:
+        '200':
+          description: Landing Page
+          links:
+            asset-href-modes:
+              operationId: getAssetHrefModes
+              description: |-
+                A link with rel=asset-href-modes for the entire catalog.
+  
+  '/asset-href-modes':
+    get:
+      summary: Get the list of all asset href modes supported by this STAC API.
+      operationId: getAssetHrefModes
+      description: |-
+        This endpoint returns a list of modes that can be used in the asset-href-mode parameter.
+      tags:
+        - asset-href-mode extension
+      responses:
+        '200':
+          $ref: '#/components/responses/AssetHrefModes'
+        default:
+          $ref: '#/components/responses/Error'
+  '/collections/{collectionId}':
+    get:
+      description: |-
+        This endpoint returns a list of Collections.
+      tags:
+        - Feature
+        - Collections
+      parameters:
+        - in: path
+          name: collectionId
+          schema:
+            type: string
+          required: true
+          description: ID of Collection
+      responses:
+        '200':
+          description: Collection description
+          links:
+            asset-href-modes:
+              operationId: getAssetHrefModesByCollection
+              description: |-
+                A link with rel=asset-href-modes applicable to this collection.
+  '/collections/{collectionId}/asset-href-modes':
+    get:
+      summary: Get the list of asset href modes supported for this collection.
+      operationId: getAssetHrefModesByCollection
+      description: |-
+        This endpoint returns a list of modes that can be used in the asset-href-mode parameter for this collection.
+      parameters:
+        - in: path
+          name: collectionId
+          schema:
+            type: string
+          required: true
+          description: ID of Collection
+      tags:
+        - asset-href-mode extension
+      responses:
+        '200':
+          $ref: '#/components/responses/AssetHrefModes'
+        default:
+          $ref: '#/components/responses/Error'
+
+components:
+  parameters:
+    asset-href-mode:
+      name: asset-href-mode
+      x-stac-api-fragment: asset-href-mode
+      in: query
+      description: |-
+        **Extension:** asset-href-mode
+        
+        The desired href mode for the link references in assets.
+      required: false
+      schema:
+        type: string
+  schemas:
+    exception:
+      type: object
+      description: |-
+        Information about the exception: an error code plus an optional description.
+      required:
+        - code
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+  responses:
+    Error:
+      description: An error occurred.
+      content: 
+        application/json:
+          schema:
+            $ref: '#/components/schemas/exception'
+    AssetHrefModes:
+      description: A list of asset href modes supported by this STAC API
+      content:
+        application/json:
+          schema:
+            type: object
